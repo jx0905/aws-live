@@ -25,7 +25,21 @@ table = 'employee'
 def home():
     return render_template('AddNewEmp.html')
 
-
+@app.route("/fetchdata", methods=['POST'])
+def GetEmpData():
+    
+    emp_id = request.form["emp_id"]
+    mycursor = db_conn.cursor()
+    mycursor.execute("select * from employee where emp_id = emp_id")
+    mycursor.fetchall()
+    
+    emp_image_file_name_in_s3 = "emp-id-" + str(emp_id) + "_image_file"
+    s3 = boto3.resource('s3')
+    s3_Object = s3.Bucket(custombucket).Object(emp_image_file_name_in_s3).get()
+    image = s3_Object['Body'].read().decode()
+    bucket_location = boto3.client('s3').get_bucket_location(Bucket=custombucket)
+    s3_location = (bucket_location['LocationConstraint'])
+    print(image)
 
 
 @app.route("/addemp", methods=['POST'])
